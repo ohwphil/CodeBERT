@@ -120,9 +120,7 @@ class InputFeatures(object):
              position_idx_2,
              dfg_to_code_2,
              dfg_to_dfg_2,
-             label,
-             url1,
-             url2
+             label
 
     ):
         #The first code function
@@ -141,22 +139,21 @@ class InputFeatures(object):
         
         #label
         self.label=label
-        self.url1=url1
-        self.url2=url2
         
 
 def convert_examples_to_features(item):
     #source
-    url1,url2,label,tokenizer, args,cache,url_to_code=item
-    parser=parsers['java']
-    
-    for url in [url1,url2]:
+    index, code1, code2, label,tokenizer, args,cache,url_to_code=item
+    parser=parsers['python']
+    codes = [code1, code2]
+    for i in range(2):
+        url = "train_"+index+"_"+i
         if url not in cache:
-            func=url_to_code[url]
+            func=codes[i]
             
             #extract data flow
-            code_tokens,dfg=extract_dataflow(func,parser,'java')
-            code_tokens=[tokenizer.tokenize('@ '+x)[1:] if idx!=0 else tokenizer.tokenize(x) for idx,x in enumerate(code_tokens)]
+            code_tokens,dfg=extract_dataflow(func,parser,'python')
+            code_tokens=[tokenizer.tokenize(x) for x in code_tokens]
             ori2cur_pos={}
             ori2cur_pos[-1]=(0,0)
             for i in range(len(code_tokens)):
@@ -189,11 +186,11 @@ def convert_examples_to_features(item):
             cache[url]=source_tokens,source_ids,position_idx,dfg_to_code,dfg_to_dfg
 
         
-    source_tokens_1,source_ids_1,position_idx_1,dfg_to_code_1,dfg_to_dfg_1=cache[url1]   
-    source_tokens_2,source_ids_2,position_idx_2,dfg_to_code_2,dfg_to_dfg_2=cache[url2]   
+    source_tokens_1,source_ids_1,position_idx_1,dfg_to_code_1,dfg_to_dfg_1=cache["train_"+index+"_"+1]   
+    source_tokens_2,source_ids_2,position_idx_2,dfg_to_code_2,dfg_to_dfg_2=cache["train_"+index+"_"+2]   
     return InputFeatures(source_tokens_1,source_ids_1,position_idx_1,dfg_to_code_1,dfg_to_dfg_1,
                    source_tokens_2,source_ids_2,position_idx_2,dfg_to_code_2,dfg_to_dfg_2,
-                     label,url1,url2)
+                     label)
 
 class TextDataset(Dataset):
     def __init__(self, tokenizer, args, file_path='train'):
@@ -203,28 +200,19 @@ class TextDataset(Dataset):
         
         #load index
         logger.info("Creating features from index file at %s ", index_filename)
-        url_to_code={}
-        with open('/'.join(index_filename.split('/')[:-1])+'/data.jsonl') as f:
-            for line in f:
-                line=line.strip()
-                js=json.loads(line)
-                url_to_code[js['idx']]=js['func']
-                
+        
         #load code function according to index
         data=[]
         cache={}
-        f=open(index_filename)
-        with open(index_filename) as f:
-            for line in f:
-                line=line.strip()
-                url1,url2,label=line.split('\t')
-                if url1 not in url_to_code or url2 not in url_to_code:
-                    continue
-                if label=='0':
-                    label=0
-                else:
-                    label=1
-                data.append((url1,url2,label,tokenizer, args,cache,url_to_code))
+        f = pd.read_csv("/content/drive/MyDrive/정보과학3/dacon/sample_train.csv")
+        for i in f.index:
+            line = f.loc[i, :]
+            
+            url1,url2,label=line.split('\t')
+            for i in f.index:
+              line = f.loc[i, :]
+              code1, code2, label = line['code1'], line['code2'], line['similar']
+            data.append((i, code1, code2,label,tokenizer, args,cache))
                 
         #only use 10% valid data to keep best model        
         if 'valid' in file_path:
