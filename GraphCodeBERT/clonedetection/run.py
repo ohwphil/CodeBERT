@@ -205,7 +205,7 @@ class TextDataset(Dataset):
         for i in self.f.index:
           line = self.f.loc[i, :]
           code1, code2 = line['code1'], line['code2']
-          if len(f)==3:
+          if len(self.f)==3:
             label = line['similar']
           else:
             label = None
