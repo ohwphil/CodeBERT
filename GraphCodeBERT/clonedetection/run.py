@@ -39,6 +39,7 @@ from transformers import (WEIGHTS_NAME, AdamW, get_linear_schedule_with_warmup,
 from tqdm import tqdm, trange
 import multiprocessing
 from model import Model
+import pandas as pd
 
 cpu_cont = 16
 logger = logging.getLogger(__name__)
