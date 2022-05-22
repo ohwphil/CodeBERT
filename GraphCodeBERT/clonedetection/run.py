@@ -204,7 +204,11 @@ class TextDataset(Dataset):
 
         for i in self.f.index:
           line = self.f.loc[i, :]
-          code1, code2, label = line['code1'], line['code2'], line['similar']
+          code1, code2 = line['code1'], line['code2']
+          if len(f)==3:
+            label = line['similar']
+          else:
+            label = None
           data.append((i, code1, code2,label,tokenizer, args,cache))
                 
         #only use 10% valid data to keep best model        
@@ -497,7 +501,40 @@ def test(args, model, tokenizer, best_threshold=0):
                 f.write(example.url1+'\t'+example.url2+'\t'+'1'+'\n')
             else:
                 f.write(example.url1+'\t'+example.url2+'\t'+'0'+'\n')
-                                                
+
+                
+def predict(args, model, tokenizer):
+    #build dataloader
+    pred_dataset = TextDataset(tokenizer, args, file_path=args.pred_data_file)
+    pred_sampler = SequentialSampler(eval_dataset)
+    pred_dataloader = DataLoader(eval_dataset, sampler=eval_sampler,batch_size=32,num_workers=4)
+
+    # multi-gpu evaluate
+    if args.n_gpu > 1 and eval_when_training is False:
+        model = torch.nn.DataParallel(model)
+
+    # Pred!
+    logger.info("***** Running prediction *****")
+    logger.info("  Num examples = %d", len(pred_dataset))
+    
+    nb_pred_steps = 0
+    model.eval()
+    logits=[]
+    for batch in pred_dataloader:
+        (inputs_ids_1,position_idx_1,attn_mask_1,
+        inputs_ids_2,position_idx_2,attn_mask_2,
+        labels)=[x.to(args.device)  for x in batch]
+        with torch.no_grad():
+            _,logit = model(inputs_ids_1,position_idx_1,attn_mask_1,inputs_ids_2,position_idx_2,attn_mask_2,labels)
+            logits.append(logit.cpu().numpy())
+        nb_pred_steps += 1
+    
+    #calculate scores
+    logits=np.concatenate(logits,0)
+    
+    return logits
+    
+                
 def main():
     parser = argparse.ArgumentParser()
 
@@ -514,7 +551,8 @@ def main():
                         help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
     parser.add_argument("--pred_data_file", default=None, type=str,
                         help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
-                    
+    parser.add_argument("--sample_data_file", default=None, type=str,
+                        help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
     parser.add_argument("--model_name_or_path", default=None, type=str,
                         help="The model checkpoint for weights initialization.")
     parser.add_argument("--statedict_path", default=None, type=str,
@@ -536,7 +574,7 @@ def main():
                         help="Whether to run eval on the dev set.")       
     parser.add_argument("--evaluate_during_training", action='store_true',
                         help="Run evaluation during training at each logging step.")
-    parser.add_argument("--do_predict", action='store_true',
+    parser.add_argument("--do_pred", action='store_true',
                         help="Whether to predict on the dev set.") 
 
     parser.add_argument("--train_batch_size", default=4, type=int,
@@ -605,6 +643,15 @@ def main():
         model.load_state_dict(torch.load(output_dir))
         model.to(args.device)
         test(args, model, tokenizer,best_threshold=0.5)
+    
+    if args.do_pred:
+        model.load_state_dict(torch.load(statedict_path))
+        model.to(args.device)
+        logits = predict(args, model, tokenizer,best_threshold=0.5)
+        
+        df = pd.read_csv(sample_data_file)
+        df['similar'] = logits
+        df.to_csv(sample_data_file)
 
     return results
 
