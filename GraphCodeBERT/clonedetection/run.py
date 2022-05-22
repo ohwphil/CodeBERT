@@ -206,14 +206,11 @@ class TextDataset(Dataset):
         data=[]
         cache={}
         f = pd.read_csv("/content/drive/MyDrive/정보과학3/dacon/sample_train.csv")
+
         for i in f.index:
-            line = f.loc[i, :]
-            
-            url1,url2,label=line.split('\t')
-            for i in f.index:
-              line = f.loc[i, :]
-              code1, code2, label = line['code1'], line['code2'], line['similar']
-            data.append((i, code1, code2,label,tokenizer, args,cache))
+          line = f.loc[i, :]
+          code1, code2, label = line['code1'], line['code2'], line['similar']
+        data.append((i, code1, code2,label,tokenizer, args,cache))
                 
         #only use 10% valid data to keep best model        
         if 'valid' in file_path:
