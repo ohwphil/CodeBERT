@@ -531,8 +531,10 @@ def predict(args, model, tokenizer):
     
     #calculate scores
     logits=np.concatenate(logits,0)
-    
-    return logits
+    best_threshold=0.5
+
+    y_preds=logits[:,1]>best_threshold
+    return y_preds
     
                 
 def main():
@@ -647,7 +649,7 @@ def main():
     if args.do_pred:
         model.load_state_dict(torch.load(args.statedict_path))
         model.to(args.device)
-        logits = predict(args, model, tokenizer,best_threshold=0.5)
+        logits = predict(args, model, tokenizer)
         
         df = pd.read_csv(sample_data_file)
         df['similar'] = logits
