@@ -205,7 +205,7 @@ class TextDataset(Dataset):
         #load code function according to index
         data=[]
         cache={}
-        self.f = pd.read_csv("/content/drive/MyDrive/정보과학3/dacon/sample_train.csv")
+        self.f = pd.read_csv(file_path)
 
         for i in self.f.index:
           line = self.f.loc[i, :]
