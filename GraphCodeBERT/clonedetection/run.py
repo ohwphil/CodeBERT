@@ -144,7 +144,7 @@ class InputFeatures(object):
 
 def convert_examples_to_features(item):
     #source
-    index, code1, code2, label,tokenizer, args,cache,url_to_code=item
+    index, code1, code2, label,tokenizer, args, cache = item
     parser=parsers['python']
     codes = [code1, code2]
     for i in range(2):
