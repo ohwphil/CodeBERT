@@ -205,10 +205,10 @@ class TextDataset(Dataset):
         #load code function according to index
         data=[]
         cache={}
-        f = pd.read_csv("/content/drive/MyDrive/정보과학3/dacon/sample_train.csv")
+        self.f = pd.read_csv("/content/drive/MyDrive/정보과학3/dacon/sample_train.csv")
 
-        for i in f.index:
-          line = f.loc[i, :]
+        for i in self.f.index:
+          line = self.f.loc[i, :]
           code1, code2, label = line['code1'], line['code2'], line['similar']
         data.append((i, code1, code2,label,tokenizer, args,cache))
                 
@@ -238,7 +238,7 @@ class TextDataset(Dataset):
 
 
     def __len__(self):
-        return len(self.examples)
+        return len(self.f.index)
     
     def __getitem__(self, item):
         #calculate graph-guided masked function
