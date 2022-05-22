@@ -148,7 +148,7 @@ def convert_examples_to_features(item):
     parser=parsers['python']
     codes = [code1, code2]
     for i in range(2):
-        url = "train_"+index+"_"+str(i)
+        url = "train_"+str(index)+"_"+str(i)
         if url not in cache:
             func=codes[i]
             
@@ -187,8 +187,8 @@ def convert_examples_to_features(item):
             cache[url]=source_tokens,source_ids,position_idx,dfg_to_code,dfg_to_dfg
 
         
-    source_tokens_1,source_ids_1,position_idx_1,dfg_to_code_1,dfg_to_dfg_1=cache["train_"+index+"_"+"1"]   
-    source_tokens_2,source_ids_2,position_idx_2,dfg_to_code_2,dfg_to_dfg_2=cache["train_"+index+"_"+"2"]   
+    source_tokens_1,source_ids_1,position_idx_1,dfg_to_code_1,dfg_to_dfg_1=cache["train_"+str(index)+"_"+"1"]   
+    source_tokens_2,source_ids_2,position_idx_2,dfg_to_code_2,dfg_to_dfg_2=cache["train_"+str(index)+"_"+"2"]   
     return InputFeatures(source_tokens_1,source_ids_1,position_idx_1,dfg_to_code_1,dfg_to_dfg_1,
                    source_tokens_2,source_ids_2,position_idx_2,dfg_to_code_2,dfg_to_dfg_2,
                      label)
