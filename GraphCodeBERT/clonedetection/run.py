@@ -317,7 +317,7 @@ def train(args, train_dataset, model, tokenizer):
     model.to(args.device)
     
     if args.statedict_path is not None:
-      model.load_state_dict(torch.load(statedict_path))
+      model.load_state_dict(torch.load(args.statedict_path))
     
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ['bias', 'LayerNorm.weight']
