@@ -645,7 +645,7 @@ def main():
         test(args, model, tokenizer,best_threshold=0.5)
     
     if args.do_pred:
-        model.load_state_dict(torch.load(statedict_path))
+        model.load_state_dict(torch.load(args.statedict_path))
         model.to(args.device)
         logits = predict(args, model, tokenizer,best_threshold=0.5)
         
