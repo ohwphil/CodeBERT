@@ -210,7 +210,7 @@ class TextDataset(Dataset):
         for i in self.f.index:
           line = self.f.loc[i, :]
           code1, code2, label = line['code1'], line['code2'], line['similar']
-        data.append((i, code1, code2,label,tokenizer, args,cache))
+          data.append((i, code1, code2,label,tokenizer, args,cache))
                 
         #only use 10% valid data to keep best model        
         if 'valid' in file_path:
