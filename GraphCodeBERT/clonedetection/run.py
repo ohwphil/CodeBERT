@@ -238,7 +238,7 @@ class TextDataset(Dataset):
 
 
     def __len__(self):
-        return len(self.f.index)
+        return len(self.examples)
     
     def __getitem__(self, item):
         #calculate graph-guided masked function
