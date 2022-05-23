@@ -210,7 +210,7 @@ class TextDataset(Dataset):
             label = line['similar']
           else:
             label = None
-          self.examples.append(convert_examples_to_features([(i, code1, code2,label,cache)], args, tokenizer))
+          self.examples.append(convert_examples_to_features((i, code1, code2,label,cache), args, tokenizer))
                 
         #only use 10% valid data to keep best model        
         if 'valid' in file_path:
