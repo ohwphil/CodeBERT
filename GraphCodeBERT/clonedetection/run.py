@@ -40,6 +40,7 @@ from tqdm import tqdm, trange
 import multiprocessing
 from model import Model
 import pandas as pd
+import pickle
 
 cpu_cont = 16
 logger = logging.getLogger(__name__)
@@ -211,7 +212,10 @@ class TextDataset(Dataset):
           else:
             label = None
           self.examples.append(convert_examples_to_features((i, code1, code2,label,cache), args, tokenizer))
-                
+        with open('/content/drive/MyDrive/정보과학3/dacon/open/test.pkl', 'wb') as f:
+          pickle.dump(self.examples, f, pickle.HIGHEST_PROTOCOL)
+        
+        
         #only use 10% valid data to keep best model        
         if 'valid' in file_path:
             data=random.sample(data,int(len(data)*0.1))
@@ -508,7 +512,7 @@ def predict(args, model, tokenizer):
     #build dataloader
     pred_dataset = TextDataset(tokenizer, args, file_path=args.pred_data_file)
     pred_sampler = SequentialSampler(pred_dataset)
-    pred_dataloader = DataLoader(pred_dataset, sampler=eval_sampler,batch_size=32,num_workers=4)
+    pred_dataloader = DataLoader(pred_dataset, sampler=pred_sampler,batch_size=32,num_workers=4)
 
     # multi-gpu evaluate
     if args.n_gpu > 1 and eval_when_training is False:
