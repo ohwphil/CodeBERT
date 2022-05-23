@@ -519,7 +519,7 @@ def predict(args, model, tokenizer):
     #build dataloader
     pred_dataset = TextDataset(tokenizer, args, file_path=args.pred_data_file)
     pred_sampler = SequentialSampler(pred_dataset)
-    pred_dataloader = DataLoader(pred_dataset, sampler=pred_sampler,batch_size=32,num_workers=4)
+    pred_dataloader = DataLoader(pred_dataset, sampler=pred_sampler,batch_size=320,num_workers=4)
 
     # multi-gpu evaluate
     if args.n_gpu > 1 and eval_when_training is False:
