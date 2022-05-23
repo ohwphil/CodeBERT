@@ -137,9 +137,9 @@ class InputFeatures(object):
         self.label=label
         
 
-def convert_examples_to_features(item, args):
+def convert_examples_to_features(item, args, tokenizer):
     #source
-    index, code1, code2, label,tokenizer, cache = item
+    index, code1, code2, label, cache = item
     parser=parsers['python']
     codes = [code1, code2]
     for i in range(2):
@@ -209,14 +209,14 @@ class TextDataset(Dataset):
             label = line['similar']
           else:
             label = None
-          data.append((i, code1, code2,label,tokenizer,cache))
+          data.append((i, code1, code2,label,cache))
                 
         #only use 10% valid data to keep best model        
         if 'valid' in file_path:
             data=random.sample(data,int(len(data)*0.1))
             
         #convert example to input features    
-        self.examples=[convert_examples_to_features(x, args) for x in tqdm(data,total=len(data))]
+        self.examples=[convert_examples_to_features(x, args, tokenizer) for x in tqdm(data,total=len(data))]
         
         if 'train' in file_path:
             for idx, example in enumerate(self.examples[:3]):
