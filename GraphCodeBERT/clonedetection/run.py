@@ -214,7 +214,7 @@ class TextDataset(Dataset):
             try:
               label = line['similar']
             except:
-              label = -1 # Dummy value
+              label = 0 # Dummy value
             self.examples.append(convert_examples_to_features((i, code1, code2,label,cache), args, tokenizer))
           with open('/content/drive/MyDrive/정보과학3/dacon/open/test.pkl', 'wb') as f:
             pickle.dump(self.examples, f, pickle.HIGHEST_PROTOCOL)
@@ -296,7 +296,7 @@ class TextDataset(Dataset):
                     attn_mask_2[idx+node_index,a+node_index]=True   
         
         if self.examples[item].label == None:
-          self.examples[item].label = -1
+          self.examples[item].label = 0 # Dummy
                     
         return (torch.tensor(self.examples[item].input_ids_1),
                 torch.tensor(self.examples[item].position_idx_1),
