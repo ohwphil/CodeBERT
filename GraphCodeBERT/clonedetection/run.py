@@ -200,6 +200,7 @@ class TextDataset(Dataset):
         #load code function according to index
         data=[]
         cache={}
+        
         self.f = pd.read_csv(file_path)
 
         for i in self.f.index:
@@ -209,14 +210,14 @@ class TextDataset(Dataset):
             label = line['similar']
           else:
             label = None
-          data.append((i, code1, code2,label,cache))
+          self.examples.append(convert_examples_to_features([(i, code1, code2,label,cache)], args, tokenizer))
                 
         #only use 10% valid data to keep best model        
         if 'valid' in file_path:
             data=random.sample(data,int(len(data)*0.1))
             
         #convert example to input features    
-        self.examples=[convert_examples_to_features(x, args, tokenizer) for x in tqdm(data,total=len(data))]
+        # self.examples=[convert_examples_to_features(x, args, tokenizer) for x in tqdm(data,total=len(data))]
         
         if 'train' in file_path:
             for idx, example in enumerate(self.examples[:3]):
