@@ -137,9 +137,9 @@ class InputFeatures(object):
         self.label=label
         
 
-def convert_examples_to_features(item):
+def convert_examples_to_features(item, args):
     #source
-    index, code1, code2, label,tokenizer, args, cache = item
+    index, code1, code2, label,tokenizer, cache = item
     parser=parsers['python']
     codes = [code1, code2]
     for i in range(2):
@@ -178,10 +178,10 @@ def convert_examples_to_features(item):
             dfg_to_dfg=[x[-1] for x in dfg]
             dfg_to_code=[ori2cur_pos[x[1]] for x in dfg]
             length=len([tokenizer.cls_token])
-            dfg_to_code=[(x[0]+length,x[1]+length) for x in dfg_to_code]        
+            dfg_to_code=[(x[0]+length,x[1]+length) for x in dfg_to_code]
             cache[url]=source_tokens,source_ids,position_idx,dfg_to_code,dfg_to_dfg
 
-        
+    
     source_tokens_1,source_ids_1,position_idx_1,dfg_to_code_1,dfg_to_dfg_1=cache["train_"+str(index)+"_"+"0"]   
     source_tokens_2,source_ids_2,position_idx_2,dfg_to_code_2,dfg_to_dfg_2=cache["train_"+str(index)+"_"+"1"]   
     return InputFeatures(source_tokens_1,source_ids_1,position_idx_1,dfg_to_code_1,dfg_to_dfg_1,
@@ -209,14 +209,14 @@ class TextDataset(Dataset):
             label = line['similar']
           else:
             label = None
-          data.append((i, code1, code2,label,tokenizer, args,cache))
+          data.append((i, code1, code2,label,tokenizer,cache))
                 
         #only use 10% valid data to keep best model        
         if 'valid' in file_path:
             data=random.sample(data,int(len(data)*0.1))
             
         #convert example to input features    
-        self.examples=[convert_examples_to_features(x) for x in tqdm(data,total=len(data))]
+        self.examples=[convert_examples_to_features(x, args) for x in tqdm(data,total=len(data))]
         
         if 'train' in file_path:
             for idx, example in enumerate(self.examples[:3]):
@@ -577,7 +577,7 @@ def main():
     parser.add_argument("--evaluate_during_training", action='store_true',
                         help="Run evaluation during training at each logging step.")
     parser.add_argument("--do_pred", action='store_true',
-                        help="Whether to predict on the dev set.") 
+                        help="Whether to predict on the dev set.")
 
     parser.add_argument("--train_batch_size", default=4, type=int,
                         help="Batch size per GPU/CPU for training.")
