@@ -203,7 +203,7 @@ class TextDataset(Dataset):
         
         self.f = pd.read_csv(file_path)
 
-        for i in self.f.index:
+        for i in tqdm(self.f.index, total = len(self.f.index)):
           line = self.f.loc[i, :]
           code1, code2 = line['code1'], line['code2']
           if len(self.f)==3:
