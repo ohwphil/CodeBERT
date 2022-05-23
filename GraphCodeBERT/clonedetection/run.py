@@ -202,18 +202,21 @@ class TextDataset(Dataset):
         data=[]
         cache={}
         
-        self.f = pd.read_csv(file_path)
+        if args.pred_load_pickle:
+          self.examples = pickle.load(args.pred_pickle_path)
+        else:
+          self.f = pd.read_csv(file_path)
 
-        for i in tqdm(self.f.index, total = len(self.f.index)):
-          line = self.f.loc[i, :]
-          code1, code2 = line['code1'], line['code2']
-          if len(self.f)==3:
-            label = line['similar']
-          else:
-            label = None
-          self.examples.append(convert_examples_to_features((i, code1, code2,label,cache), args, tokenizer))
-        with open('/content/drive/MyDrive/정보과학3/dacon/open/test.pkl', 'wb') as f:
-          pickle.dump(self.examples, f, pickle.HIGHEST_PROTOCOL)
+          for i in tqdm(self.f.index, total = len(self.f.index)):
+            line = self.f.loc[i, :]
+            code1, code2 = line['code1'], line['code2']
+            if len(self.f)==3:
+              label = line['similar']
+            else:
+              label = -1 # Dummy value
+            self.examples.append(convert_examples_to_features((i, code1, code2,label,cache), args, tokenizer))
+          with open('/content/drive/MyDrive/정보과학3/dacon/open/test.pkl', 'wb') as f:
+            pickle.dump(self.examples, f, pickle.HIGHEST_PROTOCOL)
         
         
         #only use 10% valid data to keep best model        
@@ -583,7 +586,11 @@ def main():
                         help="Run evaluation during training at each logging step.")
     parser.add_argument("--do_pred", action='store_true',
                         help="Whether to predict on the dev set.")
-
+    parser.add_argument("--pred_load_pickle", action='store_true',
+                        help="Whether to load the pickle file for the prediction set.")
+    parser.add_argument("--pred_pickle_path", default="", type=str,
+                        help="Path of the pickle file")
+    
     parser.add_argument("--train_batch_size", default=4, type=int,
                         help="Batch size per GPU/CPU for training.")
     parser.add_argument("--eval_batch_size", default=4, type=int,
