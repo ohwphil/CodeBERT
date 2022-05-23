@@ -667,9 +667,9 @@ def main():
         model.to(args.device)
         logits = predict(args, model, tokenizer)
         
-        df = pd.read_csv(sample_data_file)
+        df = pd.read_csv(args.sample_data_file)
         df['similar'] = logits
-        df.to_csv(sample_data_file)
+        df.to_csv(args.sample_data_file)
 
     return results
 
