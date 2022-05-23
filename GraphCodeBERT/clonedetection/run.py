@@ -532,7 +532,7 @@ def predict(args, model, tokenizer):
     nb_pred_steps = 0
     model.eval()
     logits=[]
-    for batch in pred_dataloader:
+    for batch in tqdm(pred_dataloader, total = len(pred_dataloader)):
         (inputs_ids_1,position_idx_1,attn_mask_1,
         inputs_ids_2,position_idx_2,attn_mask_2,
         labels)=[x.to(args.device)  for x in batch]
