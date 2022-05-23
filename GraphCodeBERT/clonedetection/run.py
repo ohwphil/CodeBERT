@@ -203,7 +203,7 @@ class TextDataset(Dataset):
         cache={}
         
         if args.pred_load_pickle:
-          self.examples = pickle.load(args.pred_pickle_path)
+          self.examples = pickle.loads(args.pred_pickle_path)
         else:
           self.f = pd.read_csv(file_path)
 
