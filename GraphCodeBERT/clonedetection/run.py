@@ -211,9 +211,9 @@ class TextDataset(Dataset):
           for i in tqdm(self.f.index, total = len(self.f.index)):
             line = self.f.loc[i, :]
             code1, code2 = line['code1'], line['code2']
-            if len(self.f)==4:
+            try:
               label = line['similar']
-            else:
+            except:
               label = -1 # Dummy value
             self.examples.append(convert_examples_to_features((i, code1, code2,label,cache), args, tokenizer))
           with open('/content/drive/MyDrive/정보과학3/dacon/open/test.pkl', 'wb') as f:
@@ -293,7 +293,10 @@ class TextDataset(Dataset):
         for idx,nodes in enumerate(self.examples[item].dfg_to_dfg_2):
             for a in nodes:
                 if a+node_index<len(self.examples[item].position_idx_2):
-                    attn_mask_2[idx+node_index,a+node_index]=True                      
+                    attn_mask_2[idx+node_index,a+node_index]=True   
+        
+        if self.examples[item].label == None:
+          self.examples[item].label = -1
                     
         return (torch.tensor(self.examples[item].input_ids_1),
                 torch.tensor(self.examples[item].position_idx_1),
