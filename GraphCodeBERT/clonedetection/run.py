@@ -399,23 +399,14 @@ def train(args, train_dataset, model, tokenizer):
                 avg_loss=round(np.exp((tr_loss - logging_loss) /(global_step- tr_nb)),4)
 
                 if global_step % args.save_steps == 0:
-                    results = evaluate(args, model, tokenizer, eval_when_training=True)    
-                    
-                    # Save model checkpoint
-                    if results['eval_f1']>best_f1:
-                        best_f1=results['eval_f1']
-                        logger.info("  "+"*"*20)  
-                        logger.info("  Best f1:%s",round(best_f1,4))
-                        logger.info("  "+"*"*20)                          
-                        
-                        checkpoint_prefix = 'checkpoint-best-f1'
-                        output_dir = os.path.join(args.output_dir, '{}'.format(checkpoint_prefix))                        
-                        if not os.path.exists(output_dir):
-                            os.makedirs(output_dir)                        
-                        model_to_save = model.module if hasattr(model,'module') else model
-                        output_dir = os.path.join(output_dir, '{}'.format('model.bin')) 
-                        torch.save(model_to_save.state_dict(), output_dir)
-                        logger.info("Saving model checkpoint to %s", output_dir)
+                    checkpoint_prefix = 'checkpoint-best-f1'+str(step)
+                    output_dir = os.path.join(args.output_dir, '{}'.format(checkpoint_prefix))                        
+                    if not os.path.exists(output_dir):
+                        os.makedirs(output_dir)                        
+                    model_to_save = model.module if hasattr(model,'module') else model
+                    output_dir = os.path.join(output_dir, '{}'.format('model.bin')) 
+                    torch.save(model_to_save.state_dict(), output_dir)
+                    logger.info("Saving model checkpoint to %s", output_dir)
                         
 def evaluate(args, model, tokenizer, eval_when_training=False):
     #build dataloader
