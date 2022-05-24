@@ -216,8 +216,9 @@ class TextDataset(Dataset):
             except:
               label = 0 # Dummy value
             self.examples.append(convert_examples_to_features((i, code1, code2,label,cache), args, tokenizer))
-          with open('/content/drive/MyDrive/정보과학3/dacon/open/test.pkl', 'wb') as f:
-            pickle.dump(self.examples, f, pickle.HIGHEST_PROTOCOL)
+          if args.save_pickle:
+            with open(args.save_pickle_path, 'wb') as f:
+              pickle.dump(self.examples, f, pickle.HIGHEST_PROTOCOL)
         
         
         #only use 10% valid data to keep best model        
@@ -571,6 +572,10 @@ def main():
                         help="The model checkpoint for weights initialization.")
     parser.add_argument("--statedict_path", default=None, type=str,
                         help="Statedicts for the entire model.")
+    parser.add_argument("--save_pickle", action='store_true',
+                        help="Whether to save the pickle file for the prediction set.")
+    parser.add_argument("--save_pickle_path", default="", type=str,
+                        help="Path of the pickle file")
     parser.add_argument("--config_name", default="", type=str,
                         help="Optional pretrained config name or path if not the same as model_name_or_path")
     parser.add_argument("--tokenizer_name", default="", type=str,
