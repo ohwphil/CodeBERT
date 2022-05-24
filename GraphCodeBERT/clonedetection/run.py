@@ -202,8 +202,8 @@ class TextDataset(Dataset):
         data=[]
         cache={}
         
-        if args.pred_load_pickle:
-          with open(args.pred_pickle_path, 'rb') as pkl:
+        if args.load_pickle:
+          with open(args.pickle_path, 'rb') as pkl:
             self.examples = pickle.load(pkl)
         else:
           self.f = pd.read_csv(file_path)
@@ -595,9 +595,9 @@ def main():
                         help="Run evaluation during training at each logging step.")
     parser.add_argument("--do_pred", action='store_true',
                         help="Whether to predict on the dev set.")
-    parser.add_argument("--pred_load_pickle", action='store_true',
+    parser.add_argument("--load_pickle", action='store_true',
                         help="Whether to load the pickle file for the prediction set.")
-    parser.add_argument("--pred_pickle_path", default="", type=str,
+    parser.add_argument("--pickle_path", default="", type=str,
                         help="Path of the pickle file")
     
     parser.add_argument("--train_batch_size", default=4, type=int,
