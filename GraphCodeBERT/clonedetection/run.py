@@ -536,8 +536,10 @@ def predict(args, model, tokenizer):
     #calculate scores
     logits=np.concatenate(logits,0)
     best_threshold=0.5
-
-    y_preds=logits[:,1]>best_threshold
+    if args.return_prob:
+      y_preds = logits[:,1]
+    else:
+      y_preds = logits[:,1]>best_threshold
     return y_preds
     
                 
@@ -588,6 +590,8 @@ def main():
                         help="Whether to predict on the dev set.")
     parser.add_argument("--load_pickle", action='store_true',
                         help="Whether to load the pickle file for the prediction set.")
+    parser.add_argument("--return_prob", action='store_true',
+                        help="Whether to return probabilities for the prediction set.")
     parser.add_argument("--pickle_path", default="", type=str,
                         help="Path of the pickle file")
     
@@ -665,7 +669,7 @@ def main():
         
         df = pd.read_csv(args.sample_data_file)
         df['similar'] = logits
-        df.to_csv(args.sample_data_file)
+        df.to_csv(args.sample_data_file, index = False)
 
     return results
 
