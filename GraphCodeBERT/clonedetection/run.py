@@ -184,7 +184,8 @@ def convert_examples_to_features(item, args, tokenizer):
 
     
     source_tokens_1,source_ids_1,position_idx_1,dfg_to_code_1,dfg_to_dfg_1=cache["train_"+str(index)+"_"+"0"]   
-    source_tokens_2,source_ids_2,position_idx_2,dfg_to_code_2,dfg_to_dfg_2=cache["train_"+str(index)+"_"+"1"]   
+    source_tokens_2,source_ids_2,position_idx_2,dfg_to_code_2,dfg_to_dfg_2=cache["train_"+str(index)+"_"+"1"]
+    del cache
     return InputFeatures(source_tokens_1,source_ids_1,position_idx_1,dfg_to_code_1,dfg_to_dfg_1,
                    source_tokens_2,source_ids_2,position_idx_2,dfg_to_code_2,dfg_to_dfg_2,
                      label)
@@ -407,7 +408,8 @@ def train(args, train_dataset, model, tokenizer):
                     output_dir = os.path.join(output_dir, '{}'.format('model.bin')) 
                     torch.save(model_to_save.state_dict(), output_dir)
                     logger.info("Saving model checkpoint to %s", output_dir)
-                        
+                    torch.cuda.empty_cache()  
+                      
 def evaluate(args, model, tokenizer, eval_when_training=False):
     #build dataloader
     eval_dataset = TextDataset(tokenizer, args, file_path=args.eval_data_file)
