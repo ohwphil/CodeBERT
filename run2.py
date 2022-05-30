@@ -329,6 +329,9 @@ def train(args, train_dataset, model, tokenizer):
     args.save_steps=len( train_dataloader)//10
     args.warmup_steps=args.max_steps//5
     model.to(args.device)
+    
+    if args.statedict_path is not None:
+      model.load_state_dict(torch.load(args.statedict_path))
 
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ['bias', 'LayerNorm.weight']
@@ -398,23 +401,15 @@ def train(args, train_dataset, model, tokenizer):
                 avg_loss=round(np.exp((tr_loss - logging_loss) /(global_step- tr_nb)),4)
 
                 if global_step % args.save_steps == 0:
-                    results = evaluate(args, model, tokenizer, eval_when_training=True)    
-
-                    # Save model checkpoint
-                    if results['eval_f1']>best_f1:
-                        best_f1=results['eval_f1']
-                        logger.info("  "+"*"*20)  
-                        logger.info("  Best f1:%s",round(best_f1,4))
-                        logger.info("  "+"*"*20)                          
-
-                        checkpoint_prefix = 'checkpoint-best-f1'
-                        output_dir = os.path.join(args.output_dir, '{}'.format(checkpoint_prefix))                        
-                        if not os.path.exists(output_dir):
-                            os.makedirs(output_dir)                        
-                        model_to_save = model.module if hasattr(model,'module') else model
-                        output_dir = os.path.join(output_dir, '{}'.format('model.bin')) 
-                        torch.save(model_to_save.state_dict(), output_dir)
-                        logger.info("Saving model checkpoint to %s", output_dir)
+                    checkpoint_prefix = 'checkpoint-best-f1'+str(step)
+                    output_dir = os.path.join(args.output_dir, '{}'.format(checkpoint_prefix))                        
+                    if not os.path.exists(output_dir):
+                        os.makedirs(output_dir)                        
+                    model_to_save = model.module if hasattr(model,'module') else model
+                    output_dir = os.path.join(output_dir, '{}'.format('model.bin')) 
+                    torch.save(model_to_save.state_dict(), output_dir)
+                    logger.info("Saving model checkpoint to %s", output_dir)
+                    torch.cuda.empty_cache()  
 
 def evaluate(args, model, tokenizer, eval_when_training=False):
     #build dataloader
@@ -531,6 +526,8 @@ def main():
 
     parser.add_argument("--model_name_or_path", default=None, type=str,
                         help="The model checkpoint for weights initialization.")
+    parser.add_argument("--statedict_path", default=None, type=str,
+                        help="Statedicts for the entire model.")
 
     parser.add_argument("--config_name", default="", type=str,
                         help="Optional pretrained config name or path if not the same as model_name_or_path")
