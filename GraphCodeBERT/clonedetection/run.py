@@ -211,7 +211,7 @@ class TextDataset(Dataset):
 
           for i in tqdm(self.f.index, total = len(self.f.index)):
             line = self.f.loc[i, :]
-            code1, code2 = line['code1'], line['code2']
+            code1, code2 = self.f.loc[i, 'code1'], self.f.loc[i, 'code2']
             try:
               label = line['similar']
             except:
@@ -220,6 +220,7 @@ class TextDataset(Dataset):
           if args.save_pickle:
             with open(args.save_pickle_path, 'wb') as f:
               pickle.dump(self.examples, f, pickle.HIGHEST_PROTOCOL)
+          self.f.unpersist()
         
         
         #only use 10% valid data to keep best model        
