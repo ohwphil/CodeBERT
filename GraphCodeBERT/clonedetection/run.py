@@ -436,7 +436,10 @@ def evaluate(args, model, tokenizer, eval_when_training=False):
         inputs_ids_2,position_idx_2,attn_mask_2,
         labels)=[x.to(args.device)  for x in batch]
         with torch.no_grad():
-            lm_loss,logit = model(inputs_ids_1,position_idx_1,attn_mask_1,inputs_ids_2,position_idx_2,attn_mask_2,labels)
+            if args.sentence_swap:
+                lm_loss,logit = model(inputs_ids_2,position_idx_2,attn_mask_2,inputs_ids_1,position_idx_1,attn_mask_1,labels)
+            else:
+                lm_loss,logit = model(inputs_ids_1,position_idx_1,attn_mask_1,inputs_ids_2,position_idx_2,attn_mask_2,labels)
             eval_loss += lm_loss.mean().item()
             logits.append(logit.cpu().numpy())
             y_trues.append(labels.cpu().numpy())
@@ -595,6 +598,8 @@ def main():
                         help="Whether to load the pickle file for the prediction set.")
     parser.add_argument("--return_prob", action='store_true',
                         help="Whether to return probabilities for the prediction set.")
+    parser.add_argument("--sentence_swap", action='store_true',
+                        help="Whether to swap in predictions.")
     parser.add_argument("--pickle_path", default="", type=str,
                         help="Path of the pickle file")
     
