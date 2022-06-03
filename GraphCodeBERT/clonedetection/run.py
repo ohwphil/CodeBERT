@@ -436,10 +436,7 @@ def evaluate(args, model, tokenizer, eval_when_training=False):
         inputs_ids_2,position_idx_2,attn_mask_2,
         labels)=[x.to(args.device)  for x in batch]
         with torch.no_grad():
-            if args.sentence_swap:
-                lm_loss,logit = model(inputs_ids_2,position_idx_2,attn_mask_2,inputs_ids_1,position_idx_1,attn_mask_1,labels)
-            else:
-                lm_loss,logit = model(inputs_ids_1,position_idx_1,attn_mask_1,inputs_ids_2,position_idx_2,attn_mask_2,labels)
+            lm_loss,logit = model(inputs_ids_1,position_idx_1,attn_mask_1,inputs_ids_2,position_idx_2,attn_mask_2,labels)
             eval_loss += lm_loss.mean().item()
             logits.append(logit.cpu().numpy())
             y_trues.append(labels.cpu().numpy())
@@ -535,7 +532,7 @@ def predict(args, model, tokenizer):
         inputs_ids_2,position_idx_2,attn_mask_2,
         labels)=[x.to(args.device)  for x in batch]
         with torch.no_grad():
-            _,logit = model(inputs_ids_1,position_idx_1,attn_mask_1,inputs_ids_2,position_idx_2,attn_mask_2,labels)
+            _,logit = model(inputs_ids_1,position_idx_1,attn_mask_1,inputs_ids_2,position_idx_2,attn_mask_2,labels) if not args.sentence_swap else model(inputs_ids_2,position_idx_2,attn_mask_2,inputs_ids_1,position_idx_1,attn_mask_1,labels)
             logits.append(logit.cpu().numpy())
         nb_pred_steps += 1
     
@@ -566,6 +563,8 @@ def main():
     parser.add_argument("--pred_data_file", default=None, type=str,
                         help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
     parser.add_argument("--sample_data_file", default=None, type=str,
+                        help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
+    parser.add_argument("--export_data_file", default=None, type=str,
                         help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
     parser.add_argument("--model_name_or_path", default=None, type=str,
                         help="The model checkpoint for weights initialization.")
@@ -678,7 +677,7 @@ def main():
         
         df = pd.read_csv(args.sample_data_file)
         df['similar'] = logits
-        df.to_csv(args.sample_data_file, index = False)
+        df.to_csv(args.export_data_file, index = False)
 
     return results
 
